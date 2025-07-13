@@ -1,7 +1,10 @@
 import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { Text, View, StyleSheet } from "react-native";
 import Profile from "./Profile";
-import test from '../assets/images/favicon.png'
+import test from '../assets/images/favicon.png';
+
+import React from "react";
+
 export default function CustomDrawerContent( props : DrawerContentComponentProps ) {
     
     return(

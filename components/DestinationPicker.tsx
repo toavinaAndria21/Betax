@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Animated, View, StyleSheet, Text } from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Input from './Input';
 import Button from './Button';
 
@@ -13,11 +14,11 @@ export default function DestinationPicker({ visible, onClose }: Props) {
   const [actualLocation, setActualLocation] = useState<string>('');
   const [destination, setDestination] = useState<string>('');
 
-  const slideAnim = useRef(new Animated.Value(300)).current;
+  const slideAnim = useRef(new Animated.Value(hp('50%'))).current;
 
   useEffect(() => {
     Animated.timing(slideAnim, {
-      toValue: visible ? 0 : 300, 
+      toValue: visible ? 0 : hp('50%'),
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -30,22 +31,22 @@ export default function DestinationPicker({ visible, onClose }: Props) {
           styles.modalContent,
           { transform: [{ translateY: slideAnim }] },
         ]}
-       >
-        <Text style={ styles.title }>Trouvez votre itinéraire</Text>
-        <View style={ styles.inputContainer}>
-            <Input 
-                value={ actualLocation }
-                onChange={ setActualLocation }
-                icon={ <MaterialIcons name='location-on' color={'#fff'} size={24}/> }
-            />
-             <Input 
-                value={ destination }
-                onChange={ setDestination }
-                icon={ <MaterialIcons name='my-location' color={'#fff'} size={24}/> }
-            />
-            <Button label='Trouver un bus'/>
+      >
+        <Text style={styles.title}>Trouvez votre itinéraire</Text>
+        <View style={styles.inputContainer}>
+          <Input
+            value={actualLocation}
+            onChange={setActualLocation}
+            icon={<MaterialIcons name="location-on" color={'#fff'} size={wp('6%')} />}
+          />
+          <Input
+            value={destination}
+            onChange={setDestination}
+            icon={<MaterialIcons name="my-location" color={'#fff'} size={wp('6%')} />}
+          />
+          <Button label="Trouver un bus" />
         </View>
-       </Animated.View>
+      </Animated.View>
     </View>
   );
 }
@@ -57,25 +58,27 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   modalContent: {
-    height: '40%',
-    width: '98%',
+    height: hp('45%'),
+    width: wp('98%'),
     backgroundColor: '#393E46',
-    borderTopRightRadius: 18,
-    borderTopLeftRadius: 18,
+    borderTopRightRadius: wp('5%'),
+    borderTopLeftRadius: wp('5%'),
     position: 'absolute',
     bottom: 0,
     alignSelf: 'center',
-    padding: 10,
+    padding: wp('4%'),
   },
-  title: { 
-    color: '#fff', 
-    textAlign:'center', 
+  title: {
+    color: '#fff',
+    textAlign: 'center',
     textTransform: 'uppercase',
-    fontSize: 16,
-    fontWeight: 'bold'
+    fontSize: hp('2.4%'),
+    fontWeight: 'bold',
+    marginBottom: hp('1.5%'),
   },
   inputContainer: {
     width: '100%',
-    height: '100%'
-  }
+    height: '100%',
+    gap: hp('2%'),
+  },
 });

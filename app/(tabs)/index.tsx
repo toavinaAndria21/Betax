@@ -1,49 +1,50 @@
-import { Text, View, StyleSheet, Pressable } from "react-native";
-import { useNavigation } from '@react-navigation/native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import React, { useState } from "react";
+import { View, StyleSheet, Pressable } from "react-native";
+import LiveMap from "@/components/LiveMap";
 import DestinationPicker from "@/components/DestinationPicker";
-import { useState } from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
-// type RootDrawerParamList = {
-//   index: undefined;
-//   history: undefined;
-// };
 export default function Index() {
-
-  // const Navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList>>();
-  const [isDestinationPickerVisible, setIsDestinationPickerVisible] = useState<boolean>(false)
+  const [isDestinationPickerVisible, setIsDestinationPickerVisible] = useState(false);
 
   return (
-    <Pressable
-      // onPressIn={()=> setIsDestinationPickerVisible(false)}
-      // onPressOut={()=> setIsDestinationPickerVisible(true)}
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: '#fff'
-      }}
-    >
+    <View style={styles.container}>
+      <LiveMap />
 
-   {/* <DestinationPicker
+      {/* Bouton flottant en bas à droite */}
+      <Pressable
+        style={styles.fabButton}
+        
+        onPress={() => setIsDestinationPickerVisible(true)}
+      >
+        <Ionicons name="navigate" size={wp('6%')} color="white" />
+      </Pressable>
+
+      <DestinationPicker
         visible={isDestinationPickerVisible}
         onClose={() => setIsDestinationPickerVisible(false)}
-    /> */}
-
-    </Pressable>
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  burgerMenu: {
-    width: 35,
-    height: 35,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  fabButton: {
+    position: "absolute",
+    bottom: hp('3%'),
+    right: wp('5%'),
+    width: wp('14%'),
+    height: wp('14%'),
+    backgroundColor: "#2196F3",
+    borderRadius: wp('7%'),
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 6,
+    zIndex: 20,
   },
 });
