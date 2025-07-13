@@ -3,11 +3,6 @@ import { View, StyleSheet } from "react-native";
 import LiveMap from "@/components/LiveMap";
 
 export default function Index() {
-  const [isDestinationPickerVisible, setIsDestinationPickerVisible] = useState(true); // Formulaire visible au début
-
-  const handleMapTouch = () => {
-    setIsDestinationPickerVisible(false);
-  };
 
   return (
     <View style={styles.container}>
