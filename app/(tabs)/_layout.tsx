@@ -1,45 +1,58 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import CustomDrawerContent from "@/components/CustomDrawerContent";
+import Index from ".";
+import History from "./history";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
+const Drawer = createDrawerNavigator();
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+    <Drawer.Navigator
+        drawerContent={ (props) => <CustomDrawerContent {...props}/> }
+        screenOptions={{
+        headerShown: true,
+        headerStyle:{
+            backgroundColor: '#fff',
+        },
+        drawerStyle: {
+          width: 260
+        },
+        drawerActiveTintColor: '#fff',
+        drawerInactiveTintColor: '#fff',
+        drawerLabelStyle: {
+          fontSize: 16,
+          fontWeight: 'bold',
+          color:'#fff'
+        },
+        drawerItemStyle: {
+          borderWidth: 1,
+          borderBottomColor: '#ccc',
+          borderTopColor: '#ccc',
+          borderLeftWidth: 0,
+          borderRightWidth: 0,
+          borderRadius: 0,
+        }
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+    >
+        <Drawer.Screen name="index"
+                     component={ Index }
+                     options={{ 
+                        title: "Carte",
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="map" size={size} color={color} />
+                        ),
+                     }} 
+                     
+        />
+        <Drawer.Screen name="history" 
+                    component={ History }
+                    options={{ 
+                        title: "Historique",
+                        drawerIcon: ({ color, size }) => (
+                            <MaterialIcons name="history" size={size} color={color} />
+                        ),
+                     }} 
+        />
+    </Drawer.Navigator>
   );
 }
