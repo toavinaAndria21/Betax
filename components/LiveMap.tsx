@@ -23,10 +23,20 @@ export default function LiveMap() {
     try {
       const response = await fetch(`${API_URL}/latitude/${CENTER_COORDINATES.latitude}/longitude/${CENTER_COORDINATES.longitude}/radius/3`);
       const json = await response.json();
-      console.log(JSON.stringify(json))
+
       if (json.status === 200) {
-        setBusData(json.data.bus || []);
-        setArretData(json.data.arret || []);
+        // ✅ Nouvelle structure
+        const rawBusData = json.data?.bus?.data || [];
+        const cleanedBusData = rawBusData.map((bus: any) => ({
+          latitude: bus.driver.latitude,
+          longitude: bus.driver.longitude,
+          nom: bus.driver.nom,
+        }));
+
+        const rawArretData = json.data?.arret || [];
+
+        setBusData(cleanedBusData);
+        setArretData(rawArretData);
       }
     } catch (error) {
       console.error('Erreur API :', error);
@@ -34,8 +44,8 @@ export default function LiveMap() {
   };
 
   useEffect(() => {
-    fetchData(); // initial
-    const interval = setInterval(fetchData, 5000); // toutes les 5 sec
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
