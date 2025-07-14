@@ -49,59 +49,64 @@ export default function LiveMap() {
   };
 
   // Utiliser useCallback pour éviter la redéfinition de fetchData à chaque render
-  const fetchData = useCallback(async () => {
-    if (isLoading) return; // Éviter les appels simultanés
-    
-    const center = userCoords || { latitude: region.latitude, longitude: region.longitude };
-    setIsLoading(true);
-    
-    try {
-      console.log('Fetching data at:', new Date().toLocaleTimeString());
-      const response = await fetch(
-        `${API_URL}/latitude/${center.latitude}/longitude/${center.longitude}/radius/10`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const json = await response.json();
+ // Remplacez cette partie dans votre fonction fetchData :
 
-      if (json.data?.bus?.status === 200) {
-        const rawBusData = json.data.bus.data || [];
-        const cleanedBusData = rawBusData.map((bus: any) => ({
-          latitude: bus.driver.latitude,
-          longitude: bus.driver.longitude,
-          nom: bus.driver.nom,
-          type: bus.type,
-          matriculation: bus.matriculation,
-          frais: bus.frais,
-          distance: bus.distance,
-        }));
-        setBusData(cleanedBusData);
-      } else {
-        setBusData([]);
-      }
-
-      const rawArretData = Array.isArray(json.data?.arret) ? json.data.arret : [];
-      const cleanedArretData = rawArretData.map((arret: any) => ({
-        latitude: arret.latitude,
-        longitude: arret.longitude,
-        nom: arret.nom,
-        type: arret.type,
-        distance: Number(arret.distance.toFixed(2)),
-      }));
-      setArretData(cleanedArretData);
-      
-    } catch (error) {
-      console.error('Erreur API :', error);
-      setBusData([]);
-      setArretData([]);
-    } finally {
-      setIsLoading(false);
+const fetchData = useCallback(async () => {
+  if (isLoading) return;
+  
+  const center = userCoords || { latitude: region.latitude, longitude: region.longitude };
+  setIsLoading(true);
+  
+  try {
+    console.log('Fetching data at:', new Date().toLocaleTimeString());
+    const response = await fetch(
+      `${API_URL}/latitude/${center.latitude}/longitude/${center.longitude}/radius/3`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  }, [userCoords, region.latitude, region.longitude, isLoading]);
+    
+    const json = await response.json();
+    // console.log('Données reçues:', JSON.stringify(json));
+    
+    // CORRECTION : Vérifier le status global et traiter les bus directement
+    if (json.status === 200 && json.data?.bus) {
+      const rawBusData = json.data.bus || [];
+      const cleanedBusData = rawBusData.map((bus: any) => ({
+        latitude: bus.driver.latitude,
+        longitude: bus.driver.longitude,
+        nom: bus.driver.nom,
+        type: bus.type,
+        matriculation: bus.matriculation,
+        frais: bus.frais,
+        distance: bus.distance,
+      }));
+      setBusData(cleanedBusData);
+      // console.log('Bus traités:', cleanedBusData);
+    } else {
+      setBusData([]);
+    }
 
+    // Pour les arrêts, vérifiez aussi la structure
+    const rawArretData = Array.isArray(json.data?.arret) ? json.data.arret : [];
+    const cleanedArretData = rawArretData.map((arret: any) => ({
+      latitude: arret.latitude,
+      longitude: arret.longitude,
+      nom: arret.nom,
+      type: arret.type,
+      distance: Number(arret.distance.toFixed(2)),
+    }));
+    setArretData(cleanedArretData);
+    
+  } catch (error) {
+    console.error('Erreur API :', error);
+    setBusData([]);
+    setArretData([]);
+  } finally {
+    setIsLoading(false);
+  }
+}, [userCoords, region.latitude, region.longitude, isLoading]);
   // Effet pour la géolocalisation - s'exécute une seule fois
   useEffect(() => {
     (async () => {
@@ -165,7 +170,7 @@ export default function LiveMap() {
         prev.distance < curr.distance ? prev : curr
       );
 
-      if (nearestArret.distance <= 1) {
+      if (nearestArret.distance) {
         setInitialLocation(nearestArret.nom);
       } else {
         setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
@@ -277,6 +282,7 @@ export default function LiveMap() {
           visible={pickerVisible}
           onRequestClose={() => setPickerVisible(false)}
           initialLocation={initialLocation}
+          idVoyageur={1}
         />
       )}
     </View>

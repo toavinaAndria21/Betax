@@ -5,15 +5,23 @@ type Props = {
   label: string;
   bgColor?: string;
   onPress?: () => void;
+  disabled?: boolean;
 };
 
-export default function Button({ label, bgColor = 'green', onPress }: Props) {
+export default function Button({ label, bgColor = 'green', onPress, disabled = false }: Props) {
   return (
-    <Pressable 
-      style={[styles.button, { backgroundColor: bgColor }]} 
-      onPress={onPress}
+    <Pressable
+      style={[
+        styles.button, 
+        { backgroundColor: disabled ? '#666' : bgColor },
+        disabled && styles.disabledButton
+      ]}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
     >
-      <Text style={styles.buttonLabel}>{label}</Text>
+      <Text style={[styles.buttonLabel, disabled && styles.disabledLabel]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -27,12 +35,19 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 10    
+    margin: 10
   },
   buttonLabel: {
     color:'#fff',
     textAlign: 'center',
     textTransform: 'uppercase',
     fontWeight: 'bold'
+  },
+  disabledButton: {
+    opacity: 0.6,
+    borderColor: '#999',
+  },
+  disabledLabel: {
+    color: '#ccc',
   }
 });
