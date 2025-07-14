@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, StyleSheet, TouchableWithoutFeedback, Button, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -24,6 +24,7 @@ const API_URL = 'http://192.168.43.145:3000/radarbus/chauffeur/getAllPositionInA
 export default function LiveMap() {
   const mapRef = useRef<MapView>(null);
 
+  const intervalRef = useRef<any>(null);
   const [region, setRegion] = useState<Region>(FIANARANTSOA_REGION);
   const [busData, setBusData] = useState<any[]>([]);
   const [arretData, setArretData] = useState<any[]>([]);
@@ -31,7 +32,7 @@ export default function LiveMap() {
   const [userCoords, setUserCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<any>(null);
   const [initialLocation, setInitialLocation] = useState<string>('');
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const zoomToMarker = (latitude: number, longitude: number) => {
     if (mapRef.current) {
@@ -39,51 +40,31 @@ export default function LiveMap() {
         {
           latitude,
           longitude,
-          latitudeDelta: 0.005,  // zoom serré vertical
-          longitudeDelta: 0.005, // zoom serré horizontal
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
         },
-        500 // durée de l'animation en ms
+        500
       );
     }
   };
-  
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.warn('Permission localisation refusée');
-        return;
-      }
-      let location = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = location.coords;
-
-      if (
-        latitude > MAP_BOUNDARIES.southWest.latitude &&
-        latitude < MAP_BOUNDARIES.northEast.latitude &&
-        longitude > MAP_BOUNDARIES.southWest.longitude &&
-        longitude < MAP_BOUNDARIES.northEast.longitude
-      ) {
-        setRegion((r) => ({ ...r, latitude, longitude }));
-        setUserCoords({ latitude, longitude });
-      } else {
-        setUserCoords({ latitude: FIANARANTSOA_REGION.latitude, longitude: FIANARANTSOA_REGION.longitude });
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.setMapBoundaries(MAP_BOUNDARIES.northEast, MAP_BOUNDARIES.southWest);
-    }
-  }, []);
-
-  const fetchData = async () => {
+  // Utiliser useCallback pour éviter la redéfinition de fetchData à chaque render
+  const fetchData = useCallback(async () => {
+    if (isLoading) return; // Éviter les appels simultanés
+    
     const center = userCoords || { latitude: region.latitude, longitude: region.longitude };
+    setIsLoading(true);
+    
     try {
+      console.log('Fetching data at:', new Date().toLocaleTimeString());
       const response = await fetch(
         `${API_URL}/latitude/${center.latitude}/longitude/${center.longitude}/radius/10`
       );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const json = await response.json();
 
       if (json.data?.bus?.status === 200) {
@@ -111,18 +92,88 @@ export default function LiveMap() {
         distance: Number(arret.distance.toFixed(2)),
       }));
       setArretData(cleanedArretData);
+      
     } catch (error) {
       console.error('Erreur API :', error);
       setBusData([]);
       setArretData([]);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [userCoords, region.latitude, region.longitude, isLoading]);
 
+  // Effet pour la géolocalisation - s'exécute une seule fois
   useEffect(() => {
-    // fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, [userCoords, region]);
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.warn('Permission localisation refusée');
+        return;
+      }
+      
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      if (
+        latitude > MAP_BOUNDARIES.southWest.latitude &&
+        latitude < MAP_BOUNDARIES.northEast.latitude &&
+        longitude > MAP_BOUNDARIES.southWest.longitude &&
+        longitude < MAP_BOUNDARIES.northEast.longitude
+      ) {
+        setRegion((r) => ({ ...r, latitude, longitude }));
+        setUserCoords({ latitude, longitude });
+      } else {
+        setUserCoords({ latitude: FIANARANTSOA_REGION.latitude, longitude: FIANARANTSOA_REGION.longitude });
+      }
+    })();
+  }, []);
+
+  // Effet pour les boundaries de la map
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setMapBoundaries(MAP_BOUNDARIES.northEast, MAP_BOUNDARIES.southWest);
+    }
+  }, []);
+
+  // Effet pour l'intervalle d'API - séparé et plus stable
+  useEffect(() => {
+    // Première exécution immédiate
+    fetchData();
+    
+    // Nettoyer l'ancien intervalle s'il existe
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    // Créer le nouveau intervalle
+    intervalRef.current = setInterval(() => {
+      fetchData();
+    }, 5000);
+    
+    // Nettoyage à la destruction du composant
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [fetchData]);
+
+  // Effet pour calculer la localisation initiale
+  useEffect(() => {
+    if (userCoords && arretData.length > 0) {
+      const nearestArret = arretData.reduce((prev, curr) =>
+        prev.distance < curr.distance ? prev : curr
+      );
+
+      if (nearestArret.distance <= 1) {
+        setInitialLocation(nearestArret.nom);
+      } else {
+        setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
+      }
+    } else if (userCoords) {
+      setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
+    }
+  }, [userCoords, arretData]);
 
   const handleRegionChangeComplete = (newRegion: Region) => {
     if (
@@ -147,27 +198,6 @@ export default function LiveMap() {
       setSelectedMarker(null);
     }
   };
-  useEffect(() => {
-    if (userCoords && arretData.length > 0) {
-
-      // Trouver l'arrêt le plus proche
-      const nearestArret = arretData.reduce((prev, curr) =>
-        prev.distance < curr.distance ? prev : curr
-      );
-      // console.log("Ato ihany ", JSON.stringify(nearestArret.nom));
-  
-      if (nearestArret.distance <= 1) {
-        // Si un arrêt est très proche (< 1 km), on met son nom
-        setInitialLocation(nearestArret.nom);
-      } else {
-        // Sinon on met la position GPS sous forme texte
-        setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
-      }
-    } else if (userCoords) {
-      // Si pas d'arrêt, on met la position GPS
-      setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
-    }
-  }, [userCoords, arretData]);
 
   return (
     <View style={styles.container}>
@@ -246,10 +276,9 @@ export default function LiveMap() {
         <DestinationPicker
           visible={pickerVisible}
           onRequestClose={() => setPickerVisible(false)}
-          initialLocation={initialLocation}  // <-- Passe la valeur ici
+          initialLocation={initialLocation}
         />
       )}
-
     </View>
   );
 }
@@ -313,5 +342,18 @@ const styles = StyleSheet.create({
     fontSize: hp('2.7%'),
     color: '#666',
     fontWeight: 'bold',
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    top: hp('5%'),
+    right: wp('5%'),
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: hp('1%'),
+    borderRadius: wp('2%'),
+    zIndex: 999,
+  },
+  loadingText: {
+    color: 'white',
+    fontSize: hp('1.5%'),
   },
 });
