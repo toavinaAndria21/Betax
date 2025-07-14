@@ -58,7 +58,7 @@ export default function LiveMap() {
     try {
       console.log('Fetching data at:', new Date().toLocaleTimeString());
       const response = await fetch(
-        `${API_URL}/latitude/${center.latitude}/longitude/${center.longitude}/radius/10`
+        `${API_URL}/latitude/${center.latitude}/longitude/${center.longitude}/radius/3`
       );
       
       if (!response.ok) {
@@ -165,7 +165,7 @@ export default function LiveMap() {
         prev.distance < curr.distance ? prev : curr
       );
 
-      if (nearestArret.distance <= 1) {
+      if (nearestArret.distance) {
         setInitialLocation(nearestArret.nom);
       } else {
         setInitialLocation(`Lat: ${userCoords.latitude.toFixed(5)}, Lon: ${userCoords.longitude.toFixed(5)}`);
