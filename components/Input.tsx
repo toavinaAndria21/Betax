@@ -10,6 +10,7 @@ type Props = {
     secure?: boolean,
     multiline?: boolean,
     bgColor?: string,
+    textColor?: string,
     icon?: React.ReactNode,
     width?: number ,
     height?: number
@@ -23,6 +24,7 @@ export default function Input({
         secure = false, 
         multiline = false,
         bgColor = '#4F5962',
+        textColor = '#000',
         icon,
         width,
         height
@@ -34,7 +36,7 @@ export default function Input({
             <TextInput
                 style={[
                 styles.input,
-                { backgroundColor: bgColor, paddingLeft: icon ? 40 : 10, height: height ?? 50, width: width ?? '100%' }, // décaler le texte si icône
+                { backgroundColor: bgColor, paddingLeft: icon ? 40 : 10, height: height ?? 50, width: width ?? '100%', color: textColor },
                 ]}
                 onChangeText={(value) => onChange(value)}
                 value={value}

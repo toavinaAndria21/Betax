@@ -6,9 +6,11 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 type Props = {
     imageSource: string | number;
     profileName: string;
+    profileEmail: string
 };
 
-export default function Profile({ imageSource, profileName }: Props) {
+export default function Profile({ imageSource, profileName, profileEmail }: Props) {
+    
     const size = wp('30%');
 
     return (
@@ -22,7 +24,8 @@ export default function Profile({ imageSource, profileName }: Props) {
                     />
                 </Pressable>
             </View>
-            <Text style={styles.profileName}>{profileName}</Text>
+            <Text style={styles.profileName}>{ profileName }</Text>
+            <Text style={styles.profileEmail}>{ profileEmail }</Text>
         </View>
     );
 }
@@ -44,9 +47,15 @@ const styles = StyleSheet.create({
     },
     profileName: {
         color: '#fff',
-        fontSize: wp('4%'),
+        fontSize: wp('3.5%'),
         fontWeight: 'bold',
         textAlign: 'center',
         marginTop: hp('1%'),
+    },
+    profileEmail: {
+    color: '#ddd',
+    fontSize: wp('3%'),
+    textAlign: 'center',
+    marginTop: hp('0.5%'),
     },
 });
