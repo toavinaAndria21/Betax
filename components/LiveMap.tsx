@@ -5,6 +5,8 @@ import * as Location from 'expo-location';
 import DestinationPicker from './DestinationPicker';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { LogBox } from 'react-native';
+import { useUser } from '@/context/UserContext';
+
 LogBox.ignoreAllLogs();
 
 const FIANARANTSOA_REGION = {
@@ -33,6 +35,7 @@ export default function LiveMap() {
   const [selectedMarker, setSelectedMarker] = useState<any>(null);
   const [initialLocation, setInitialLocation] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const {user} = useUser();
 
   const zoomToMarker = (latitude: number, longitude: number) => {
     if (mapRef.current) {
@@ -282,7 +285,7 @@ const fetchData = useCallback(async () => {
           visible={pickerVisible}
           onRequestClose={() => setPickerVisible(false)}
           initialLocation={initialLocation}
-          idVoyageur={1}
+          idVoyageur={user?.id}
         />
       )}
     </View>

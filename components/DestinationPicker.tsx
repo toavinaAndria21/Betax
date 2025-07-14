@@ -89,6 +89,7 @@ const BusService = {
     try {
 
       console.log(idBus, idVoyageur, " etooooooooooooooooooooo")
+      
       const response = await fetch('http://192.168.43.145:3000/radarbus/prendre', {
         method: 'POST',
         headers: {
