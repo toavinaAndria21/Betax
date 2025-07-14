@@ -77,7 +77,6 @@ const Driver: React.FC = () => {
   };
 
   const startLocationTracking = async () => {
-    alert('helll')
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       console.warn('Permission de localisation refusée');
@@ -102,7 +101,7 @@ const Driver: React.FC = () => {
           }),
         })
           .then((res) => res.json())
-          .then((data) => alert(data))
+          .then((data) => console.log(data.status))
           .catch((err) => console.error('Erreur envoi position', err));
       }
     );
