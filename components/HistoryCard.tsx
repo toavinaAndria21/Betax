@@ -8,7 +8,7 @@ export default function HistoryCard({
     matriculation = "3456 TBA", 
     frais = "1500", 
     date = "2025-07-13T18:53:33.639Z",
-    distance = "1,5"
+    distance = "0"
     }) {
 
     const getBusTypeColor = (type: string) => {

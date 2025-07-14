@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
 type User = {
   nom: string;
@@ -10,9 +10,13 @@ type UserContextType = {
   setUser: (user: User | null) => void;
 };
 
+type UserProviderProps = {
+    children: ReactNode;
+}
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({ children }) => {
+export const UserProvider = ({ children } : UserProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
 
   return (

@@ -17,35 +17,6 @@ export default function History() {
     const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState<Array<any>>([]);
 
-    const test = [
-        {
-            id: 1,
-            busType: "40",
-            trajet: "Antanifotsy - Ankofafa",
-            matriculation: "3456 TBA",
-            frais: "1500",
-            date: "2025-07-08T10:53:33.639Z",  
-            distance: "1,5"
-        },
-        {
-            id: 2,
-            busType: "21",
-            trajet: "Anosy - Tsianolondroa",
-            matriculation: "1234 TBA",
-            frais: "1000",
-            date: "2025-07-02T14:20:10.000Z", 
-            distance: "2,2"
-        },
-        {
-            id: 3,
-            busType: "33",
-            trajet: "Ampitatafika - Ambatomena",
-            matriculation: "5698 TBA",
-            frais: "800",
-            date: "2025-06-29T09:10:00.000Z", 
-            distance: "3,8"
-        }
-    ];
 
     const fetchData = async () => {
         setLoading(true);
@@ -61,7 +32,7 @@ export default function History() {
                 matriculation: item.bus?.matriculation ?? "Inconnu",
                 frais: item.bus?.frais?.toString() ?? "0",
                 date: item.date,
-                distance: '1'
+                distance: item?.bus?.distance.toFixed(2)
             }));
 
             setData(mappedData);
