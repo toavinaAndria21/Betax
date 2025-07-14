@@ -156,7 +156,7 @@ export default function LiveMap() {
       );
       // console.log("Ato ihany ", JSON.stringify(nearestArret.nom));
   
-      if (nearestArret.distance < 1) {
+      if (nearestArret.distance <= 1) {
         // Si un arrêt est très proche (< 1 km), on met son nom
         setInitialLocation(nearestArret.nom);
       } else {
