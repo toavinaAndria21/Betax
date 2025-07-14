@@ -98,7 +98,7 @@ export default function SignUpScreen() {
           type: "success",
           text1: "Compte créé avec succès !",
         });
-        setTimeout(() => router.push("/auth/Login"), 1000);
+        setTimeout(() => router.push("/auth/Login"), 2000);
       } else {
         Toast.show({
           type: "error",

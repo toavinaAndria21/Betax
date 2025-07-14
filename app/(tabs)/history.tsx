@@ -57,7 +57,7 @@ export default function History() {
             const mappedData = json.data.map((item: any, index: number) => ({
                 id: index + 1,
                 busType: item.bus?.type?.toString() || "Inconnu",
-                trajet: `${item.bus?.driver?.nom ?? "Chauffeur inconnu"} - ${item.traveller?.nom ?? "Voyageur inconnu"}`,
+                trajet: `${item.bus?.primus ?? "Inconnu"} - ${item.bus?.terminus ?? "Inconnu"}`,
                 matriculation: item.bus?.matriculation ?? "Inconnu",
                 frais: item.bus?.frais?.toString() ?? "0",
                 date: item.date,

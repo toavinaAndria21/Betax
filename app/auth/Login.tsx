@@ -43,7 +43,9 @@ export default function LoginScreen() {
           text1: "Connexion réussie",
           text2: "Bienvenue !",
         });
-        router.replace("(tabs)"); 
+        setTimeout(()=>{
+          router.replace("(tabs)"); 
+        }, 3000);
       } else if (data.status === 404) {
         Toast.show({
           type: "error",
