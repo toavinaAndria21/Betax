@@ -6,17 +6,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 export default function Index() {
-  const [isDestinationPickerVisible, setIsDestinationPickerVisible] = useState(false);
+  const [isDestinationPickerVisible, setIsDestinationPickerVisible] = useState(true);
 
   return (
     <View style={styles.container}>
       <LiveMap />
 
-      {/* Bouton flottant en bas à droite */}
       <Pressable
         style={styles.fabButton}
         
-        onPress={() => setIsDestinationPickerVisible(true)}
+        onPress={() => setIsDestinationPickerVisible(!isDestinationPickerVisible)}
       >
         <Ionicons name="navigate" size={wp('6%')} color="white" />
       </Pressable>
