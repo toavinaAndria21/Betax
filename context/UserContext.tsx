@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, ReactNode } from "react";
 type User = {
   nom: string;
   email: string;
+  id: number
 };
 
 type UserContextType = {
