@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import { TextInput, StyleSheet, KeyboardTypeOptions, View } from "react-native";
 
 type Props = {
@@ -10,7 +10,9 @@ type Props = {
     secure?: boolean,
     multiline?: boolean,
     bgColor?: string,
-    icon?: React.ReactNode
+    icon?: React.ReactNode,
+    width?: number ,
+    height?: number
 }
 export default function Input({ 
         type, 
@@ -21,7 +23,9 @@ export default function Input({
         secure = false, 
         multiline = false,
         bgColor = '#4F5962',
-        icon
+        icon,
+        width,
+        height
     }:Props ) {
 
     return(
@@ -30,7 +34,7 @@ export default function Input({
             <TextInput
                 style={[
                 styles.input,
-                { backgroundColor: bgColor, paddingLeft: icon ? 40 : 10 }, // décaler le texte si icône
+                { backgroundColor: bgColor, paddingLeft: icon ? 40 : 10, height: height ?? 50, width: width ?? '100%' }, // décaler le texte si icône
                 ]}
                 onChangeText={(value) => onChange(value)}
                 value={value}
@@ -47,7 +51,7 @@ export default function Input({
 
 const styles = StyleSheet.create({
   container: {
-    margin: 12,
+    margin: 6,
   },
   icon: {
     position: "absolute",
@@ -58,7 +62,6 @@ const styles = StyleSheet.create({
   },
   input: {
     position: "relative",
-    height: 50,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 5,
