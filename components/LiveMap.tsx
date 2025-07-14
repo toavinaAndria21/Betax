@@ -119,7 +119,7 @@ export default function LiveMap() {
   };
 
   useEffect(() => {
-    fetchData();
+    // fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, [userCoords, region]);

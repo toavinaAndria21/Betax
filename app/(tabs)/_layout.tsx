@@ -50,7 +50,7 @@ export default function TabLayout() {
         name="history"
         component={History}
         options={{
-          title: "Historique",
+          title: "Historiques",
           drawerIcon: ({ color, size }: { color: string; size: number }) => (
             <MaterialIcons name="history" size={size} color={color} />
           ),
