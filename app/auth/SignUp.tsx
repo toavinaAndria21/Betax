@@ -23,7 +23,7 @@ export default function SignUpScreen() {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
