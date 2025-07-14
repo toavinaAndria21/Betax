@@ -32,6 +32,7 @@ export default function DestinationPicker({ visible, onRequestClose, initialLoca
   const [displayed, setDisplayed] = useState(visible);
   const [actualLocation, setActualLocation] = useState<string>(initialLocation || '');
   const [destination, setDestination] = useState<string>('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   
   const slideDistance = useMemo(() => hp('50%'), []);
   const slideAnim = useRef(new Animated.Value(slideDistance)).current;
@@ -42,6 +43,22 @@ export default function DestinationPicker({ visible, onRequestClose, initialLoca
       setActualLocation(initialLocation);
     }
   }, [initialLocation]);
+
+  // Gestion du clavier
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -95,7 +112,10 @@ export default function DestinationPicker({ visible, onRequestClose, initialLoca
         <Animated.View
           style={[
             styles.modalContent,
-            { transform: [{ translateY: slideAnim }] },
+            { 
+              transform: [{ translateY: slideAnim }],
+              bottom: keyboardHeight > 0 ? keyboardHeight : 0
+            },
           ]}
         >
           <ScrollView
@@ -127,7 +147,6 @@ export default function DestinationPicker({ visible, onRequestClose, initialLoca
 }
 
 const styles = StyleSheet.create({
-
   flex: {
     flex: 1,
   },
