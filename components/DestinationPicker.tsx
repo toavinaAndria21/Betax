@@ -1,5 +1,16 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { Animated, View, StyleSheet, Text, Alert } from "react-native";
+import {
+  Animated,
+  View,
+  StyleSheet,
+  Text,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Input from './Input';
@@ -8,7 +19,7 @@ import Button from './Button';
 type Props = {
   visible: boolean;
   onRequestClose: () => void;
-  onPress?: () => void;
+  initialLocation?: string; 
 };
 
 const mockBusData = [
@@ -17,13 +28,20 @@ const mockBusData = [
   { id: 3, name: 'Bus 303', route: 'A - C' },
 ];
 
-export default function DestinationPicker({ visible, onRequestClose }: Props) {
+export default function DestinationPicker({ visible, onRequestClose, initialLocation }: Props) {
   const [displayed, setDisplayed] = useState(visible);
-  const [actualLocation, setActualLocation] = useState<string>('');
+  const [actualLocation, setActualLocation] = useState<string>(initialLocation || '');
   const [destination, setDestination] = useState<string>('');
-
+  
   const slideDistance = useMemo(() => hp('50%'), []);
   const slideAnim = useRef(new Animated.Value(slideDistance)).current;
+
+  // Met à jour actualLocation si initialLocation change
+  useEffect(() => {
+    if (initialLocation) {
+      setActualLocation(initialLocation);
+    }
+  }, [initialLocation]);
 
   useEffect(() => {
     if (visible) {
@@ -49,7 +67,6 @@ export default function DestinationPicker({ visible, onRequestClose }: Props) {
       Alert.alert('Erreur', 'Veuillez remplir les deux champs.');
       return;
     }
-    // Simuler une recherche dans les mock data
     const foundBuses = mockBusData.filter(bus =>
       bus.route.toLowerCase().includes(actualLocation.toLowerCase()) &&
       bus.route.toLowerCase().includes(destination.toLowerCase())
@@ -61,56 +78,67 @@ export default function DestinationPicker({ visible, onRequestClose }: Props) {
       Alert.alert('Bus trouvés', `Bus disponibles:\n${foundBuses.map(b => b.name).join('\n')}`);
     }
 
-    // Fermer le modal après la recherche
     onRequestClose();
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <View style={styles.overlay} pointerEvents={visible ? 'auto' : 'none'}>
-      <Animated.View
-        style={[
-          styles.modalContent,
-          { transform: [{ translateY: slideAnim }] },
-        ]}
-      >
-        <Text style={styles.title}>Trouvez votre itinéraire</Text>
-        <View style={styles.inputContainer}>
-          <Input
-            value={actualLocation}
-            onChange={setActualLocation}
-            icon={<MaterialIcons name="location-on" color={'#fff'} size={wp('6%')} />}
-            placeHolder="Votre position actuelle"
-          />
-          <Input
-            value={destination}
-            onChange={setDestination}
-            icon={<MaterialIcons name="my-location" color={'#fff'} size={wp('6%')} />}
-            placeHolder="Votre destination"
-          />
-          <Button label="Trouver un bus" onPress={handleFindBus} />
-        </View>
-      </Animated.View>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 100}
+    >
+      <TouchableWithoutFeedback onPress={dismissKeyboard} accessible={false}>
+        <Animated.View
+          style={[
+            styles.modalContent,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          <ScrollView
+            contentContainerStyle={styles.inputContainer}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.title}>Trouvez votre itinéraire</Text>
+            <Input
+              value={actualLocation}
+              onChange={setActualLocation}
+              icon={<MaterialIcons name="location-on" color={'#fff'} size={wp('6%')} />}
+              placeHolder="Votre position actuelle"
+            />
+            <Input
+              value={destination}
+              onChange={setDestination}
+              icon={<MaterialIcons name="my-location" color={'#fff'} size={wp('6%')} />}
+              placeHolder="Votre destination"
+            />
+            <Button label="Trouver un bus" onPress={handleFindBus} />
+          </ScrollView>
+        </Animated.View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    position: "relative",
-    top: 0, left: 0, right: 0, bottom: 0,
-    zIndex: 10,
-    backgroundColor: 'transparent',
+  flex: {
+    flex: 1,
   },
   modalContent: {
-    marginTop: hp('5%'),
+    position: 'absolute',
+    bottom: 0,
     height: hp('45%'),
     width: wp('98%'),
     backgroundColor: '#393E46',
     borderTopRightRadius: wp('5%'),
     borderTopLeftRadius: wp('5%'),
-    bottom: 0,
     alignSelf: 'center',
     padding: wp('4%'),
+    zIndex: 10,
   },
   title: {
     color: '#fff',
@@ -121,8 +149,7 @@ const styles = StyleSheet.create({
     marginBottom: hp('1.5%'),
   },
   inputContainer: {
-    width: '100%',
-    height: '100%',
+    flexGrow: 1,
     gap: hp('2%'),
   },
 });
