@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import Toast from "react-native-toast-message";
+import { useUser } from "@/context/UserContext";
 import { 
   View, 
   Text, 
@@ -17,6 +18,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -38,13 +40,17 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok && data.status === 200) {
+        setUser({
+          nom: data.user.nom,
+          email: data.user.email,
+        });
         Toast.show({
           type: "success",
           text1: "Connexion réussie",
           text2: "Bienvenue !",
         });
         setTimeout(()=>{
-          router.replace("(tabs)"); 
+          router.replace("/(tabs)"); 
         }, 3000);
       } else if (data.status === 404) {
         Toast.show({

@@ -109,12 +109,14 @@ export default function DestinationPicker({ visible, onRequestClose, initialLoca
               onChange={setActualLocation}
               icon={<MaterialIcons name="location-on" color={'#fff'} size={wp('6%')} />}
               placeHolder="Votre position actuelle"
+              textColor='#fff'
             />
             <Input
               value={destination}
               onChange={setDestination}
               icon={<MaterialIcons name="my-location" color={'#fff'} size={wp('6%')} />}
               placeHolder="Votre destination"
+              textColor='#fff'
             />
             <Button label="Trouver un bus" onPress={handleFindBus} />
           </ScrollView>
