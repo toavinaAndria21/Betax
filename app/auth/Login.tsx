@@ -19,6 +19,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useUser();
+  const [userType, setUserType] = useState("passager");
+
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -33,16 +35,19 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        `http://192.168.43.145:3000/radarbus/voyageur/login/email/${email}/mdp/${password}`
-      );
+      const baseURL = "http://192.168.43.145:3000/radarbus";
+      const endpoint = userType === "conducteur" 
+        ? `/chauffeur/login/email/${email}/mdp/${password}`
+        : `/voyageur/login/email/${email}/mdp/${password}`;
 
+      const response = await fetch(baseURL + endpoint);
       const data = await response.json();
 
       if (response.ok && data.status === 200) {
         setUser({
           nom: data.user.nom,
           email: data.user.email,
+          id: data.user.id
         });
         Toast.show({
           type: "success",
@@ -51,7 +56,11 @@ export default function LoginScreen() {
         });
 
         setTimeout(()=>{
-          router.replace("/(tabs)"); 
+          if(userType === "conducteur") {
+            router.replace("/Driver");
+          } else {
+            router.replace("/(tabs)");
+          } 
         }, 3000);
 
       } else if (data.status === 404) {
@@ -97,6 +106,35 @@ export default function LoginScreen() {
           <Text style={styles.appName}>Betax</Text>
           <Text style={styles.subtitle}>Connectez-vous pour continuer</Text>
         </View>
+
+        <View style={styles.userTypeContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.userTypeButton, 
+              userType === "passager" && styles.userTypeButtonSelected
+            ]}
+            onPress={() => setUserType("passager")}
+          >
+            <Text style={[
+              styles.userTypeButtonText,
+              userType === "passager" && styles.userTypeButtonTextSelected
+            ]}>Passager</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.userTypeButton, 
+              userType === "conducteur" && styles.userTypeButtonSelected
+            ]}
+            onPress={() => setUserType("conducteur")}
+          >
+            <Text style={[
+              styles.userTypeButtonText,
+              userType === "conducteur" && styles.userTypeButtonTextSelected
+            ]}>Conducteur</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
           <TextInput
@@ -124,9 +162,9 @@ export default function LoginScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.forgotPassword}>
+        {/* <TouchableOpacity style={styles.forgotPassword}>
           <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity 
           style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
@@ -281,7 +319,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 28,
+    marginVertical: 10,
   },
   dividerLine: {
     flex: 1,
@@ -346,4 +384,36 @@ const styles = StyleSheet.create({
     bottom: -100,
     right: -50,
   },
+  userTypeContainer: {
+  flexDirection: "row",
+  justifyContent: "center",
+  marginBottom: 24,
+  gap: 16, 
+  },
+
+  userTypeButton: {
+    flex: 1,
+    paddingVertical: 14,
+    backgroundColor: "#E8EBF0",
+    borderRadius: 16,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+
+  userTypeButtonSelected: {
+    backgroundColor: "#4A90E2",
+    borderColor: "#4A90E2",
+  },
+
+  userTypeButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#34495E",
+  },
+
+  userTypeButtonTextSelected: {
+    color: "#FFFFFF",
+  },
+
 });

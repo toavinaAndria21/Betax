@@ -7,6 +7,7 @@ import { Text, View, StyleSheet, FlatList } from "react-native";
 import dayjs from "dayjs";
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import { useUser } from "@/context/UserContext";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -16,12 +17,13 @@ export default function History() {
     const [selectedFilter, setSelectedFilter] = useState<string>('Tous');
     const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState<Array<any>>([]);
+    const { user } = useUser();
 
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://192.168.43.145:3000/radarbus/prendre/voyageur/1'); // à remplacer par ta vraie URL
+            const response = await fetch(`http://192.168.43.145:3000/radarbus/prendre/voyageur/${user.id}`); 
             const json = await response.json();
 
             if (json.status === 200 && json.result && Array.isArray(json.data)) {
